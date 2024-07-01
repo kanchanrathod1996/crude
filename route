@@ -1,0 +1,11 @@
+
+Route::get('/all_records',[CrudAppController::class,'all_records'])->name('all.records');
+Route::get('/add-new-record',[CrudAppController::class,'add_new_record'])->name('add.new.record');
+Route::post('/store-new-record',[CrudAppController::class,'store_new_record'])->name('store.new.record');
+Route::get('/edit-record/{id}',[CrudAppController::class,'edit_record'])->name('edit.record');
+
+
+Route::put('/update-record/{id}',[CrudAppController::class,'update_record'])->name('update.record');
+Route::get('/delete-record/{id}',[CrudAppController::class,'delete_record'])->name('delete.record');
+
+
