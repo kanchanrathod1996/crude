@@ -1,3 +1,14 @@
+use App\Http\Controllers\admin\CrudAppController;
+
+
+Route::get('/clear-cache', function () {
+    $exitCode = Artisan::call('config:clear');
+    $exitCode = Artisan::call('cache:clear');
+    $exitCode = Artisan::call('route:clear');
+    $exitCode = Artisan::call('view:clear');
+    return 'Successfully clear the cache from system!!'; //Return anything
+});
+
 
 Route::get('/all_records',[CrudAppController::class,'all_records'])->name('all.records');
 Route::get('/add-new-record',[CrudAppController::class,'add_new_record'])->name('add.new.record');
@@ -7,5 +18,4 @@ Route::get('/edit-record/{id}',[CrudAppController::class,'edit_record'])->name('
 
 Route::put('/update-record/{id}',[CrudAppController::class,'update_record'])->name('update.record');
 Route::get('/delete-record/{id}',[CrudAppController::class,'delete_record'])->name('delete.record');
-
 
