@@ -66,10 +66,14 @@
                                         <option value="Engineer" {{ isset($record) && $record->occupation == 'Engineer' ? 'selected' : '' }}>Engineer</option>
                                         <option value="Doctor" {{ isset($record) && $record->occupation == 'Doctor' ? 'selected' : '' }}>Doctor</option>
                                     </select>
+                                
                                 </div>
                                 <div class="mb-3">
                                     <label class="mb-1">Image</label>
                                     <input type="file" name="image" class="form-control">
+                                    @if(isset($record) && $record->image)
+                                        <img src="{{ asset('images/' . $record->image) }}" alt="{{ $record->name }}" class="mt-2" style="max-width: 100px;">
+                                    @endif
                                 </div>
                                 <div class="mb-3">
                                     <label class="mb-1">Date</label>
