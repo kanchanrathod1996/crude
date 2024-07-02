@@ -12,10 +12,7 @@ use File;
     class CrudAppController extends Controller
 
 {
-    public function __construct() {
-        
-    }
-
+    
     public function all_records()
     {
       
@@ -30,50 +27,54 @@ use File;
      
         return view('add_new_record');
     }
-
     public function store_new_record(Request $request)
     {
         $request->validate([
-            'name'=>'required|regex:/^[\pL\s\-]+$/u|max:50',
-            'email'=>'required|regex:/(.+)@(.+)\.(.+)/i|email|max:50',
-            'gender'=>'required',
-         
-           'occupation'=>'required',
-            'image'=>'required|mimes:jpg,jpeg,png,bmp',
-            'date'=>'required',
-            'fruits' => 'required|min:2'
-         
-           
+            'name' => 'required|string|max:50',
+            'email' => 'required|email|max:50',
+            'gender' => 'required|in:Male,Female',
+            'occupation' => 'required|string',
+            'image' => 'required|image|mimes:jpg,jpeg,png,bmp|max:2048', // Adjust max file size as per your requirement
+            'date' => 'required|date',
+            'fruits' => 'required|array|min:2',
+            'fruits.*' => 'string',
         ]);
-
-
-        $imageName = '';
-        if ($image = $request->file('image')){
-            $imageName = time().'-'.uniqid().'.'.$image->getClientOriginalExtension();
-            $image->move('images/profile', $imageName);
-        }
-
-        $fruits = implode(",",$request->fruits);
-
-
-        CrudApp::create([
+    
+        // Initialize a new instance of CrudApp model
+        $crudapp = new CrudApp;
+    
+        // Assign values from the request to the model instance
+        $crudapp->name = $request->name;
+        $crudapp->email = $request->email;
+        $crudapp->gender = $request->gender;
+        $crudapp->occupation = $request->occupation;
+        $crudapp->date = $request->date;
        
-            'name'=>$request->name,
-            'email'=>$request->email,
-            'gender'=>$request->gender,
-           
-            'occupation'=>$request->occupation,
-            'image'=>$imageName,
-            'date'=>$request->date,
-            'fruits'=>$fruits,
-         
-          
-        ]);
-     
-        Session::flash('message', 'New record added success.'); 
+    
+        // Handle file upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $destinationPath = 'images/';
+            $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            $image->move($destinationPath, $profileImage);
+            $crudapp->image = $profileImage; // Save image filename to the 'image' attribute
+        }
+    
+        // Handle 'fruits' array and implode into a comma-separated string
+        $crudapp->fruits = implode(",", $request->fruits);
+    
+        // Save the record to the database
+        $crudapp->save();
+    
+        // Flash success message to session
+        Session::flash('message', 'New record added successfully.'); 
         Session::flash('alert-class', 'alert-success'); 
+    
+        // Redirect back to the previous page
         return redirect()->back();
     }
+    
+
 
 
         public function edit_record($id)
@@ -82,31 +83,62 @@ use File;
         return view('add_new_record', compact('record'));
     }
 
-
-
-    public function update_record(Request $request, $id) {
-        $validated = $request->validate([
-            
-            'name'=>'required|regex:/^[\pL\s\-]+$/u|max:50',
-            'email'=>'required|regex:/(.+)@(.+)\.(.+)/i|email|max:50',
-            'gender'=>'required',
-         
-            'occupation'=>'required',
-            'image'=>'required|mimes:jpg,jpeg,png,bmp',
-            'date'=>'required',
-            'fruits' => 'required|min:2'
+    public function update_record(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:50',
+            'email' => 'required|email|max:50',
+            'gender' => 'required|in:Male,Female',
+            'occupation' => 'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,bmp|max:2048', // Allow null for image if not updated
+            'date' => 'required|date',
+            'fruits' => 'required|array|min:2',
+            'fruits.*' => 'string',
         ]);
-        
-        $fruits = implode(",",$request->fruits);
-
-        $record = CrudApp::findOrFail($id);
-
-        $data = $request->all();
-        $record->update($data);
-        return redirect()->route('all.records')->with('success_message', 'Category updated successfully!');
-
+    
+        // Fetch the existing record from database
+        $crudapp = CrudApp::findOrFail($id);
+    
+        // Assign values from the request to the model instance
+        $crudapp->name = $request->name;
+        $crudapp->email = $request->email;
+        $crudapp->gender = $request->gender;
+        $crudapp->occupation = $request->occupation;
+        $crudapp->date = $request->date;
+       
+    
+        // Handle file upload if a new image is provided
+        if ($request->hasFile('image')) {
+            // Delete the existing image file if it exists
+            if ($crudapp->image) {
+                $imagePath = public_path('images/') . $crudapp->image;
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+    
+            // Upload new image
+            $image = $request->file('image');
+            $destinationPath = 'images/';
+            $profileImage = date('YmdHis') . "." . $image->getClientOriginalExtension();
+            $image->move($destinationPath, $profileImage);
+            $crudapp->image = $profileImage; // Save image filename to the 'image' attribute
+        }
+    
+        // Handle 'fruits' array and implode into a comma-separated string
+        $crudapp->fruits = implode(",", $request->fruits);
+    
+        // Save the updated record to the database
+        $crudapp->save();
+    
+        // Flash success message to session
+        Session::flash('message', 'Record updated successfully.'); 
+        Session::flash('alert-class', 'alert-success'); 
+    
+        // Redirect back to the previous page or to a specific route
+        return redirect()->route('all.records');
     }
-
+    
 
     public function delete_record($id)
     {
