@@ -21,7 +21,7 @@
                     @foreach($all_records as $key => $record)
                     <div class="col">
                         <div class="card shadow-sm">
-                            <img src="/images/{{ $record->image }}"  class="card-img-top" style="height: 100px; object-fit: cover;">
+                            <img src="/images/{{ $record->image }}"  class="card-img-top" style="height: 100px; object-fit: fix;">
                             <div class="card-body">
                                 <h5 class="card-title">{{ $record->name }}</h5>
                                 <strong>Name:</strong> {{ $record->fruits }}<br>
