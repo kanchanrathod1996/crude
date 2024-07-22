@@ -1,0 +1,63 @@
+======================bladefile=====================
+
+<button class="delete-btn" data-id="{{ $v->id }}">Delete</button>
+
+
+  
+<script>
+	$(document).ready(function() {
+		$("#brandList").on('click', '.delete-btn', function() {
+			var id = $(this).data('id');
+			console.log(id);
+
+			var r = confirm("Are you sure you want to delete this brand?");
+			if (!r) {
+				return false;
+			}
+
+			$.ajax({
+				type: "POST",
+				url: '{{ url('admin/brand/delete') }}/' + id, // Adjust the URL to match your route
+				data: {
+					_method: 'DELETE',
+					_token: "{{ csrf_token() }}"
+				},
+				dataType: 'json',
+				beforeSend: function() {
+					$(this).prop('disabled', true);
+					$('.alert .msg-content').html('');
+					$('.alert').hide();
+				},
+				success: function(resp) {
+					if (resp.success) {
+						window.location.reload(); // Reload the page
+						$('.alert-success .msg-content').html(resp.message);
+						$('.alert-success').show();
+					} else {
+						$('.alert-danger .msg-content').html(resp.message);
+						$('.alert-danger').show();
+					}
+					$(this).prop('disabled', false);
+				},
+				error: function(xhr, status, error) {
+					alert('Error: ' + xhr.responseText);
+				}
+			});
+		});
+	});
+</script>
+
+ ======================================= route========================
+   Route::delete('brand/delete/{id}', [BrandController::class, 'destroy'])->name('brand.destroy');
+=========================controler==========================
+    public function destroy($id) {
+                $brand = Brand::findOrFail($id);
+            
+            
+                $brand->destroy($id);
+                $array = array();
+                $array['success'] = true;
+                $array['message'] = 'Userdata deleted successfully!';
+                echo json_encode($array);
+            
+            }
